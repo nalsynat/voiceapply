@@ -8,9 +8,9 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root {
-    --red: #E63946;
-    --red-dark: #C1121F;
-    --red-light: #FF6B6B;
+    --red: #1DA1F2;
+    --red-dark: #1A91DA;
+    --red-light: #4AB3F4;
     --gold: #FFB703;
     --dark: #0D0D0D;
     --dark2: #1A1A1A;
@@ -29,13 +29,9 @@
     min-height:100vh; overflow-x:hidden;
     max-width:420px; margin:0 auto;
   }
-
-  /* ── SCREENS ── */
   .screen { display:none; min-height:100vh; flex-direction:column; animation:fadeUp .35s ease forwards; }
   .screen.active { display:flex; }
   @keyframes fadeUp { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
-
-  /* ── HEADER ── */
   .header {
     padding:16px 20px 14px; background:var(--dark);
     position:sticky; top:0; z-index:10;
@@ -49,18 +45,12 @@
   .badge { background:var(--gold);color:var(--dark);font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px; }
   .header-sub { margin-top:6px; font-size:13px; color:var(--text-muted); }
   .back-btn { background:none;border:none;color:var(--text-muted);font-size:14px;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:6px;padding:0; }
-
-  /* ── LOADING ── */
   .loading-wrap { display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:16px; }
   .spinner { width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--red);border-radius:50%;animation:spin .8s linear infinite; }
   @keyframes spin { to{transform:rotate(360deg)} }
   .loading-text { font-size:14px;color:var(--text-muted); }
-
-  /* ── JOB LIST ── */
   .jobs-container { padding:16px;display:flex;flex-direction:column;gap:14px;flex:1; }
   .section-title { font-size:12px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;font-weight:600;padding:0 4px;margin-bottom:2px; }
-  .job-count { font-size:12px;color:var(--text-muted);text-align:center;padding:8px; }
-
   .job-card { background:var(--card);border-radius:var(--radius);padding:18px;border:1px solid var(--border);cursor:pointer;transition:all .2s;position:relative;overflow:hidden; }
   .job-card::before { content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:var(--red);border-radius:4px 0 0 4px; }
   .job-card:active { transform:scale(.98);border-color:var(--red); }
@@ -74,8 +64,6 @@
   .tag.highlight { background:rgba(255,183,3,.1);color:var(--gold);border-color:rgba(255,183,3,.3); }
   .apply-btn { width:100%;background:var(--red);color:white;border:none;border-radius:12px;padding:13px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px; }
   .apply-btn:active { background:var(--red-dark);transform:scale(.98); }
-
-  /* ── FORM ── */
   .form-container { padding:20px;flex:1;display:flex;flex-direction:column;gap:20px; }
   .form-hero { background:linear-gradient(135deg,var(--red) 0%,var(--red-dark) 100%);border-radius:var(--radius);padding:20px;text-align:center; }
   .form-hero-icon { font-size:36px;margin-bottom:8px; }
@@ -91,22 +79,18 @@
   .form-select option { background:var(--dark2); }
   .next-btn { background:var(--red);color:white;border:none;border-radius:12px;padding:15px;font-size:16px;font-weight:700;font-family:inherit;cursor:pointer;transition:all .2s;margin-top:auto; }
   .next-btn:active { background:var(--red-dark);transform:scale(.98); }
-
-  /* ── VOICE ── */
   .voice-container { padding:20px;flex:1;display:flex;flex-direction:column;align-items:center;gap:18px; }
   .voice-job-card { width:100%;background:var(--card);border-radius:var(--radius);padding:16px;border:1px solid var(--border);display:flex;align-items:center;gap:12px; }
   .voice-job-icon { width:42px;height:42px;background:var(--dark3);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0; }
   .voice-job-info { flex:1; }
   .voice-job-title { font-size:15px;font-weight:700; }
   .voice-job-company { font-size:13px;color:var(--text-muted); }
-
   .prompt-box { width:100%;background:rgba(255,183,3,.08);border:1px solid rgba(255,183,3,.25);border-radius:var(--radius);padding:16px; }
   .prompt-title { font-size:12px;color:var(--gold);font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px; }
   .prompt-text { font-size:15px;line-height:1.6; }
   .prompt-hints { margin-top:10px;display:flex;flex-direction:column;gap:4px; }
   .prompt-hint { font-size:13px;color:var(--text-muted);display:flex;align-items:center;gap:6px; }
   .prompt-hint::before { content:'•';color:var(--gold); }
-
   .record-area { display:flex;flex-direction:column;align-items:center;gap:14px;width:100%; }
   .timer-ring { position:relative;width:160px;height:160px;flex-shrink:0; }
   .timer-ring svg { width:160px;height:160px;transform:rotate(-90deg);position:absolute;top:0;left:0;z-index:1; }
@@ -119,16 +103,13 @@
   .record-btn.recording { animation:pulse 1.5s infinite;background:var(--red-dark); }
   @keyframes pulse { 0%{box-shadow:0 0 0 0 rgba(230,57,70,.5)} 70%{box-shadow:0 0 0 20px rgba(230,57,70,0)} 100%{box-shadow:0 0 0 0 rgba(230,57,70,0)} }
   .record-btn:active { transform:scale(.93); }
-
   .record-status { font-size:14px;color:var(--text-muted);text-align:center;min-height:20px; }
   .record-status.recording { color:var(--red-light);font-weight:600; }
   .record-status.done { color:var(--green);font-weight:600; }
-
   .waveform { display:flex;align-items:center;justify-content:center;gap:3px;height:40px;width:100%;opacity:0;transition:opacity .3s; }
   .waveform.active { opacity:1; }
   .wave-bar { width:3px;background:var(--red);border-radius:3px;animation:wave .8s ease-in-out infinite;min-height:4px; }
   @keyframes wave { 0%,100%{height:6px} 50%{height:28px} }
-
   .playback-section { width:100%;background:var(--card);border-radius:var(--radius);padding:14px 16px;border:1px solid var(--border);display:none;align-items:center;gap:12px; }
   .playback-section.visible { display:flex; }
   .play-btn { width:40px;height:40px;background:var(--green);border:none;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;transition:transform .2s; }
@@ -137,13 +118,10 @@
   .playback-title { font-size:14px;font-weight:600;color:var(--green); }
   .playback-sub { font-size:12px;color:var(--text-muted); }
   .rerecord-btn { background:none;border:1px solid var(--border);color:var(--text-muted);font-size:12px;font-family:inherit;padding:6px 10px;border-radius:8px;cursor:pointer; }
-
   .submit-btn { width:100%;background:linear-gradient(135deg,var(--red) 0%,var(--red-dark) 100%);color:white;border:none;border-radius:12px;padding:16px;font-size:16px;font-weight:700;font-family:inherit;cursor:pointer;transition:all .2s;display:none;align-items:center;justify-content:center;gap:8px;margin-top:auto;box-shadow:0 4px 20px rgba(230,57,70,.3); }
   .submit-btn.visible { display:flex; }
   .submit-btn:active { transform:scale(.98); }
   .submit-btn.loading { opacity:.7;cursor:not-allowed; }
-
-  /* ── SUCCESS ── */
   .success-container { padding:20px;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;text-align:center; }
   .success-anim { width:100px;height:100px;background:rgba(6,214,160,.1);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:48px;animation:popIn .5s cubic-bezier(.175,.885,.32,1.275) forwards;border:2px solid rgba(6,214,160,.3); }
   @keyframes popIn { from{transform:scale(0);opacity:0} to{transform:scale(1);opacity:1} }
@@ -157,26 +135,20 @@
   .success-row-text strong { color:var(--text);display:block; }
   .home-btn { width:100%;background:var(--card);color:var(--text);border:1.5px solid var(--border);border-radius:12px;padding:14px;font-size:15px;font-weight:600;font-family:inherit;cursor:pointer;transition:all .2s;margin-top:8px; }
   .home-btn:active { border-color:var(--red);color:var(--red); }
-
-  /* ── ERROR STATE ── */
   .error-wrap { display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:16px;padding:20px;text-align:center; }
   .error-icon { font-size:48px; }
   .error-title { font-size:18px;font-weight:700;color:var(--red); }
   .error-sub { font-size:14px;color:var(--text-muted);line-height:1.6; }
   .retry-btn { background:var(--red);color:white;border:none;border-radius:12px;padding:12px 24px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer; }
-
-  /* ── TOAST ── */
   .toast { position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--dark3);border:1px solid var(--border);color:var(--text);padding:12px 20px;border-radius:12px;font-size:14px;font-weight:500;z-index:999;transition:transform .3s ease;white-space:nowrap;box-shadow:0 8px 24px rgba(0,0,0,.4); }
   .toast.show { transform:translateX(-50%) translateY(0); }
   .toast.error { border-color:var(--red);color:var(--red-light); }
   .toast.success { border-color:var(--green);color:var(--green); }
-
   ::-webkit-scrollbar { width:0; }
 </style>
 </head>
 <body>
 
-<!-- ══ SCREEN 1: JOB LIST ══════════════════════════════════ -->
 <div class="screen active" id="screen-jobs">
   <div class="header">
     <div class="header-top">
@@ -189,7 +161,6 @@
     <div class="header-sub">រកការងារ · ដាក់ពាក្យក្នុង ៦០ វិនាទី</div>
   </div>
   <div class="jobs-container" id="jobs-list">
-    <!-- Jobs loaded dynamically -->
     <div class="loading-wrap">
       <div class="spinner"></div>
       <div class="loading-text">កំពុងទាញការងារ...</div>
@@ -197,7 +168,6 @@
   </div>
 </div>
 
-<!-- ══ SCREEN 2: MINI PROFILE ══════════════════════════════ -->
 <div class="screen" id="screen-profile">
   <div class="header">
     <div class="header-top">
@@ -234,7 +204,6 @@
   </div>
 </div>
 
-<!-- ══ SCREEN 3: VOICE RECORDER ════════════════════════════ -->
 <div class="screen" id="screen-voice">
   <div class="header">
     <div class="header-top">
@@ -294,13 +263,10 @@
       </div>
       <button class="rerecord-btn" onclick="resetRecording()">ថតម្តងទៀត</button>
     </div>
-    <button class="submit-btn" id="submit-btn" onclick="submitApplication()">
-      📤 បញ្ជូនពាក្យ
-    </button>
+    <button class="submit-btn" id="submit-btn" onclick="submitApplication()">📤 បញ្ជូនពាក្យ</button>
   </div>
 </div>
 
-<!-- ══ SCREEN 4: SUCCESS ════════════════════════════════════ -->
 <div class="screen" id="screen-success">
   <div class="success-container">
     <div class="success-anim">✅</div>
@@ -334,327 +300,200 @@
 
 <div class="toast" id="toast"></div>
 
-<!-- ══ JAVASCRIPT ═══════════════════════════════════════════ -->
 <script>
-// ── CONFIG ──────────────────────────────────────────────────
+// ── CONFIG (NO SECRETS!) ────────────────────────────────────
 const SUPABASE_URL  = 'https://hqcfmqbzfrjjgdcclomx.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhxY2ZtcWJ6ZnJqamdkY2Nsb214Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzMTMxMzUsImV4cCI6MjA4Njg4OTEzNX0.qosctxapm1JMhpL7xjG9CryrlJrZ7TSWrAsWDiQR1S0';
-const BOT_TOKEN     = '8321526997:AAFSedCdvaRGmFAsiN0edBbMs6BJwMfW9Zk';
-const CHAT_ID       = '96891582';
-const TOTAL_SECS    = 60;
+const TOTAL_SECS = 60;
 const CIRCUMFERENCE = 408;
 
-// ── INIT SUPABASE ───────────────────────────────────────────
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_ANON);
 
-// ── STATE ───────────────────────────────────────────────────
-let selectedJob   = null;
-let mediaRecorder = null;
-let audioChunks   = [];
-let audioBlob     = null;
-let audioURL      = null;
-let audioPlayer   = null;
-let isRecording   = false;
-let timerInterval = null;
-let secondsLeft   = TOTAL_SECS;
-let recordedSecs  = 0;
+let selectedJob=null,mediaRecorder=null,audioChunks=[],audioBlob=null,audioURL=null,audioPlayer=null;
+let isRecording=false,timerInterval=null,secondsLeft=TOTAL_SECS,recordedSecs=0;
 
-// ── NAVIGATION ──────────────────────────────────────────────
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  window.scrollTo(0, 0);
-}
-function goBack(id) { showScreen(id); }
-function goHome()   { resetRecording(); showScreen('screen-jobs'); }
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo(0,0)}
+function goBack(id){showScreen(id)}
+function goHome(){resetRecording();showScreen('screen-jobs')}
 
-// ── LOAD JOBS FROM SUPABASE ─────────────────────────────────
-async function loadJobs() {
-  const container = document.getElementById('jobs-list');
-  try {
-    const { data: jobs, error } = await db
-      .from('jobs')
-      .select('*')
-      .eq('status', 'active')
-      .order('created_at', { ascending: false });
-
-    if (error) throw error;
-
-    if (!jobs || jobs.length === 0) {
-      container.innerHTML = `
-        <div class="error-wrap">
-          <div class="error-icon">📭</div>
-          <div class="error-title">មិនមានការងារថ្មី</div>
-          <div class="error-sub">សូមមើលម្តងទៀតនៅពេលក្រោយ</div>
-        </div>`;
+async function loadJobs(){
+  const container=document.getElementById('jobs-list');
+  try{
+    const {data:jobs,error}=await db.from('jobs').select('*').eq('status','active').order('created_at',{ascending:false});
+    if(error)throw error;
+    if(!jobs||jobs.length===0){
+      container.innerHTML=`<div class="error-wrap"><div class="error-icon">📭</div><div class="error-title">មិនមានការងារថ្មី</div><div class="error-sub">សូមមើលម្តងទៀតនៅពេលក្រោយ</div></div>`;
       return;
     }
-
-    container.innerHTML = `<div class="section-title">💼 មុខងារដែលមាន (${jobs.length})</div>`;
-    jobs.forEach((job, idx) => {
-      const card = document.createElement('div');
-      card.className = 'job-card';
-      card.innerHTML = `
+    container.innerHTML=`<div class="section-title">💼 មុខងារដែលមាន (${jobs.length})</div>`;
+    jobs.forEach(job=>{
+      const card=document.createElement('div');
+      card.className='job-card';
+      card.innerHTML=`
         <div class="job-header">
-          <div class="job-emoji">${job.emoji || '💼'}</div>
-          ${job.urgency ? `<div class="job-urgency">⚡ ${job.urgency}</div>` : ''}
+          <div class="job-emoji">${job.emoji||'💼'}</div>
+          ${job.urgency?`<div class="job-urgency">⚡ ${job.urgency}</div>`:''}
         </div>
         <div class="job-title">${job.title_km}</div>
         <div class="job-company">🏢 ${job.company_km} · ${job.location}</div>
         <div class="job-tags">
           <span class="tag">🕐 Full-time</span>
           <span class="tag">📍 ${job.location}</span>
-          ${job.salary_range ? `<span class="tag highlight">💵 ${job.salary_range}</span>` : ''}
+          ${job.salary_range?`<span class="tag highlight">💵 ${job.salary_range}</span>`:''}
         </div>
         <button class="apply-btn" onclick="selectJob('${job.id}')">🎙 ដាក់ពាក្យឥឡូវ</button>`;
       container.appendChild(card);
     });
-
-  } catch (err) {
-    console.error('Load jobs error:', err);
-    container.innerHTML = `
-      <div class="error-wrap">
-        <div class="error-icon">⚠️</div>
-        <div class="error-title">មានបញ្ហាក្នុងការទាញការងារ</div>
-        <div class="error-sub">${err.message || 'សូមពិនិត្យការតភ្ជាប់អ៊ីនធឺណិត'}</div>
-        <button class="retry-btn" onclick="loadJobs()">ព្យាយាមម្តងទៀត</button>
-      </div>`;
+  }catch(err){
+    console.error('Load jobs error:',err);
+    container.innerHTML=`<div class="error-wrap"><div class="error-icon">⚠️</div><div class="error-title">មានបញ្ហា</div><div class="error-sub">${err.message||'សូមពិនិត្យអ៊ីនធឺណិត'}</div><button class="retry-btn" onclick="loadJobs()">ព្យាយាមម្តងទៀត</button></div>`;
   }
 }
 
-// ── SELECT JOB ──────────────────────────────────────────────
-async function selectJob(jobId) {
-  // Fetch job details
-  const { data: job } = await db.from('jobs').select('*').eq('id', jobId).single();
-  if (!job) { showToast('⚠️ រកមិនឃើញការងារ', 'error'); return; }
-  selectedJob = job;
-  loadProfile();
-  showScreen('screen-profile');
+async function selectJob(jobId){
+  const {data:job}=await db.from('jobs').select('*').eq('id',jobId).single();
+  if(!job){showToast('⚠️ រកមិនឃើញការងារ','error');return;}
+  selectedJob=job;loadProfile();showScreen('screen-profile');
 }
 
-// ── PROFILE (localStorage + Supabase) ──────────────────────
-function loadProfile() {
-  const p = JSON.parse(localStorage.getItem('va_profile') || '{}');
-  if (p.name)  document.getElementById('input-name').value  = p.name;
-  if (p.phone) document.getElementById('input-phone').value = p.phone;
-  if (p.pos)   document.getElementById('input-position').value = p.pos;
+function loadProfile(){
+  const p=JSON.parse(localStorage.getItem('va_profile')||'{}');
+  if(p.name)document.getElementById('input-name').value=p.name;
+  if(p.phone)document.getElementById('input-phone').value=p.phone;
+  if(p.pos)document.getElementById('input-position').value=p.pos;
 }
-function saveProfile(name, phone, pos) {
-  localStorage.setItem('va_profile', JSON.stringify({ name, phone, pos }));
-}
+function saveProfile(name,phone,pos){localStorage.setItem('va_profile',JSON.stringify({name,phone,pos}))}
 
-// ── PROFILE → VOICE ─────────────────────────────────────────
-function goToVoice() {
-  const name  = document.getElementById('input-name').value.trim();
-  const phone = document.getElementById('input-phone').value.trim();
-  const pos   = document.getElementById('input-position').value;
-  if (!name || !phone || !pos) {
-    showToast('⚠️ សូមបំពេញព័ត៌មានទាំងអស់', 'error'); return;
-  }
-  saveProfile(name, phone, pos);
-  document.getElementById('vj-emoji').textContent   = selectedJob.emoji || '💼';
-  document.getElementById('vj-title').textContent   = selectedJob.title_km;
-  document.getElementById('vj-company').textContent = selectedJob.company_km;
+function goToVoice(){
+  const name=document.getElementById('input-name').value.trim();
+  const phone=document.getElementById('input-phone').value.trim();
+  const pos=document.getElementById('input-position').value;
+  if(!name||!phone||!pos){showToast('⚠️ សូមបំពេញព័ត៌មានទាំងអស់','error');return;}
+  saveProfile(name,phone,pos);
+  document.getElementById('vj-emoji').textContent=selectedJob.emoji||'💼';
+  document.getElementById('vj-title').textContent=selectedJob.title_km;
+  document.getElementById('vj-company').textContent=selectedJob.company_km;
   showScreen('screen-voice');
 }
 
-// ── RECORDING ───────────────────────────────────────────────
-async function toggleRecording() {
-  if (isRecording) { stopRecording(); return; }
-  if (!window.isSecureContext) {
-    showToast('⚠️ ត្រូវការ HTTPS ដើម្បីថត', 'error');
-    setTimeout(() => alert('🎤 ត្រូវការ HTTPS\nសូមប្រើ GitHub Pages URL'), 300);
-    return;
-  }
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+async function toggleRecording(){
+  if(isRecording){stopRecording();return;}
+  if(!window.isSecureContext){showToast('⚠️ ត្រូវការ HTTPS','error');return;}
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
     startRecording(stream);
-  } catch(e) {
-    if (e.name === 'NotAllowedError') {
-      showToast('🎤 សូម Allow មីក្រូហ្វូន', 'error');
-    } else {
-      showToast('🎤 មិនអាចប្រើមីក្រូហ្វូន: ' + e.message, 'error');
-    }
+  }catch(e){
+    showToast('🎤 សូម Allow មីក្រូហ្វូន','error');
   }
 }
 
-function startRecording(stream) {
-  audioChunks = []; audioBlob = null;
-  isRecording = true; secondsLeft = TOTAL_SECS; recordedSecs = 0;
-  mediaRecorder = new MediaRecorder(stream);
-  mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-  mediaRecorder.onstop = finishRecording;
+function startRecording(stream){
+  audioChunks=[];audioBlob=null;isRecording=true;secondsLeft=TOTAL_SECS;recordedSecs=0;
+  mediaRecorder=new MediaRecorder(stream);
+  mediaRecorder.ondataavailable=e=>audioChunks.push(e.data);
+  mediaRecorder.onstop=finishRecording;
   mediaRecorder.start(100);
-  const btn = document.getElementById('record-btn');
-  btn.textContent = '⏹'; btn.classList.add('recording');
+  const btn=document.getElementById('record-btn');
+  btn.textContent='⏹';btn.classList.add('recording');
   document.getElementById('waveform').classList.add('active');
-  document.getElementById('record-status').textContent = '● កំពុងថត...';
-  document.getElementById('record-status').className = 'record-status recording';
+  document.getElementById('record-status').textContent='● កំពុងថត...';
+  document.getElementById('record-status').className='record-status recording';
   document.getElementById('playback-section').classList.remove('visible');
   document.getElementById('submit-btn').classList.remove('visible');
   updateTimer();
-  timerInterval = setInterval(() => {
-    secondsLeft--; recordedSecs++;
-    updateTimer();
-    if (secondsLeft <= 0) stopRecording();
-  }, 1000);
+  timerInterval=setInterval(()=>{
+    secondsLeft--;recordedSecs++;updateTimer();
+    if(secondsLeft<=0)stopRecording();
+  },1000);
 }
 
-function stopRecording() {
-  if (!mediaRecorder) return;
-  clearInterval(timerInterval);
-  isRecording = false;
+function stopRecording(){
+  if(!mediaRecorder)return;
+  clearInterval(timerInterval);isRecording=false;
   mediaRecorder.stop();
-  mediaRecorder.stream.getTracks().forEach(t => t.stop());
-  const btn = document.getElementById('record-btn');
-  btn.textContent = '🎙'; btn.classList.remove('recording');
+  mediaRecorder.stream.getTracks().forEach(t=>t.stop());
+  const btn=document.getElementById('record-btn');
+  btn.textContent='🎙';btn.classList.remove('recording');
   document.getElementById('waveform').classList.remove('active');
 }
 
-function finishRecording() {
-  audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-  audioURL  = URL.createObjectURL(audioBlob);
-  audioPlayer = new Audio(audioURL);
-  document.getElementById('record-status').textContent = '✅ ថតរួចហើយ!';
-  document.getElementById('record-status').className = 'record-status done';
+function finishRecording(){
+  audioBlob=new Blob(audioChunks,{type:'audio/webm'});
+  audioURL=URL.createObjectURL(audioBlob);
+  audioPlayer=new Audio(audioURL);
+  document.getElementById('record-status').textContent='✅ ថតរួចហើយ!';
+  document.getElementById('record-status').className='record-status done';
   document.getElementById('playback-section').classList.add('visible');
   document.getElementById('submit-btn').classList.add('visible');
 }
 
-function playRecording() {
-  if (audioPlayer) { audioPlayer.currentTime = 0; audioPlayer.play(); }
-}
+function playRecording(){if(audioPlayer){audioPlayer.currentTime=0;audioPlayer.play()}}
 
-function resetRecording() {
+function resetRecording(){
   stopRecording();
-  audioBlob = audioURL = audioPlayer = null;
-  audioChunks = []; secondsLeft = TOTAL_SECS; recordedSecs = 0;
+  audioBlob=audioURL=audioPlayer=null;audioChunks=[];secondsLeft=TOTAL_SECS;recordedSecs=0;
   updateTimer();
-  document.getElementById('record-btn').textContent = '🎙';
-  document.getElementById('record-status').textContent = 'ចុច 🎙 ដើម្បីចាប់ផ្តើមថត';
-  document.getElementById('record-status').className = 'record-status';
+  document.getElementById('record-btn').textContent='🎙';
+  document.getElementById('record-status').textContent='ចុច 🎙 ដើម្បីចាប់ផ្តើមថត';
+  document.getElementById('record-status').className='record-status';
   document.getElementById('waveform').classList.remove('active');
   document.getElementById('playback-section').classList.remove('visible');
   document.getElementById('submit-btn').classList.remove('visible');
 }
 
-function updateTimer() {
-  document.getElementById('timer-display').textContent = secondsLeft;
-  const offset = CIRCUMFERENCE * (1 - secondsLeft / TOTAL_SECS);
-  const circle = document.getElementById('timer-circle');
-  circle.style.strokeDashoffset = offset;
-  const color = secondsLeft > 20 ? 'var(--red)' : secondsLeft > 10 ? 'var(--gold)' : '#ff4444';
-  circle.style.stroke = color;
-  document.getElementById('timer-display').style.color = secondsLeft <= 10 ? '#ff4444' : 'var(--text)';
+function updateTimer(){
+  document.getElementById('timer-display').textContent=secondsLeft;
+  const offset=CIRCUMFERENCE*(1-secondsLeft/TOTAL_SECS);
+  const circle=document.getElementById('timer-circle');
+  circle.style.strokeDashoffset=offset;
+  const color=secondsLeft>20?'var(--red)':secondsLeft>10?'var(--gold)':'#ff4444';
+  circle.style.stroke=color;
+  document.getElementById('timer-display').style.color=secondsLeft<=10?'#ff4444':'var(--text)';
 }
 
-// ── SUBMIT APPLICATION ───────────────────────────────────────
-async function submitApplication() {
-  if (!audioBlob) { showToast('⚠️ សូមថតសំឡេងជាមុន', 'error'); return; }
-
-  const btn = document.getElementById('submit-btn');
-  btn.classList.add('loading');
-  btn.textContent = '⏳ កំពុងបញ្ជូន...';
-
-  const name  = document.getElementById('input-name').value.trim();
-  const phone = document.getElementById('input-phone').value.trim();
-  const pos   = document.getElementById('input-position').value;
-
-  try {
-    // ── STEP 1: Upload voice to Supabase Storage ──────────
-    const timestamp = Date.now();
-    const filePath  = `voices/${selectedJob.id}/${phone}_${timestamp}.webm`;
-
-    const { data: uploadData, error: uploadError } = await db.storage
-      .from('voices')
-      .upload(filePath, audioBlob, {
-        contentType: 'audio/webm',
-        cacheControl: '3600',
-        upsert: false
-      });
-
-    if (uploadError) throw new Error('Voice upload failed: ' + uploadError.message);
-
-    // ── STEP 2: Get public URL ────────────────────────────
-    const { data: urlData } = db.storage.from('voices').getPublicUrl(filePath);
-    const voiceUrl = urlData.publicUrl;
-
-    // ── STEP 3: Save application to Supabase ──────────────
-    const { data: appData, error: appError } = await db
-      .from('applications')
-      .insert({
-        job_id:             selectedJob.id,
-        applicant_name:     name,
-        applicant_phone:    phone,
-        position_wanted:    pos,
-        voice_url:          voiceUrl,
-        voice_duration:     recordedSecs,
-        status:             'new'
-      })
-      .select()
-      .single();
-
-    if (appError) throw new Error('Save failed: ' + appError.message);
-
-    // ── STEP 4: Save/update worker profile ────────────────
-    await db.from('workers').upsert({
-      name, phone, position_wanted: pos
-    }, { onConflict: 'phone' });
-
-    // ── STEP 5: Notify employer via Telegram ──────────────
-    const msg =
-      `🆕 ពាក្យសុំការងារថ្មី!\n\n` +
-      `📋 មុខងារ: ${selectedJob.title_km}\n` +
-      `🏢 ក្រុមហ៊ុន: ${selectedJob.company_km}\n` +
-      `👤 ឈ្មោះ: ${name}\n` +
-      `📱 ទូរស័ព្ទ: ${phone}\n` +
-      `💼 មុខតំណែង: ${pos}\n` +
-      `📅 ថ្ងៃ: ${new Date().toLocaleDateString('km-KH')}\n` +
-      `🔗 ID: ${appData.id.slice(0,8)}\n\n` +
-      `🎙 សំឡេងភ្ជាប់ខាងក្រោម 👇`;
-
-    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: CHAT_ID, text: msg })
-    });
-
-    // ── STEP 6: Send voice to Telegram ────────────────────
-    const formData = new FormData();
-    formData.append('chat_id', CHAT_ID);
-    formData.append('voice', audioBlob, 'voice_pitch.webm');
-    formData.append('caption', `🎙 ${name} · ${pos} · ${selectedJob.title_km}`);
-    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendVoice`, {
-      method: 'POST', body: formData
-    });
-
-    // ── STEP 7: Show success ──────────────────────────────
-    document.getElementById('success-job').textContent   = selectedJob.title_km;
-    document.getElementById('success-name').textContent  = name;
-    document.getElementById('success-phone').textContent = phone;
+async function submitApplication(){
+  if(!audioBlob){showToast('⚠️ សូមថតសំឡេងជាមុន','error');return;}
+  const btn=document.getElementById('submit-btn');
+  btn.classList.add('loading');btn.textContent='⏳ កំពុងបញ្ជូន...';
+  const name=document.getElementById('input-name').value.trim();
+  const phone=document.getElementById('input-phone').value.trim();
+  const pos=document.getElementById('input-position').value;
+  try{
+    const timestamp=Date.now();
+    const filePath=`voices/${selectedJob.id}/${phone}_${timestamp}.webm`;
+    const {data:uploadData,error:uploadError}=await db.storage.from('voices').upload(filePath,audioBlob,{contentType:'audio/webm',cacheControl:'3600',upsert:false});
+    if(uploadError)throw new Error('Upload failed: '+uploadError.message);
+    const {data:urlData}=db.storage.from('voices').getPublicUrl(filePath);
+    const voiceUrl=urlData.publicUrl;
+    const {data:appData,error:appError}=await db.from('applications').insert({
+      job_id:selectedJob.id,applicant_name:name,applicant_phone:phone,
+      position_wanted:pos,voice_url:voiceUrl,voice_duration:recordedSecs,status:'new'
+    }).select().single();
+    if(appError)throw new Error('Save failed: '+appError.message);
+    await db.from('workers').upsert({name,phone,position_wanted:pos},{onConflict:'phone'});
+    
+    // ✅ TELEGRAM NOTIFICATION NOW HANDLED BY EDGE FUNCTION AUTOMATICALLY!
+    // The database trigger will call the Edge Function which sends Telegram messages
+    
+    document.getElementById('success-job').textContent=selectedJob.title_km;
+    document.getElementById('success-name').textContent=name;
+    document.getElementById('success-phone').textContent=phone;
     showScreen('screen-success');
-
-  } catch(err) {
-    console.error('Submit error:', err);
-    showToast('❌ ' + (err.message || 'មានបញ្ហា សូមព្យាយាមម្តងទៀត'), 'error');
-    btn.classList.remove('loading');
-    btn.innerHTML = '📤 បញ្ជូនពាក្យ';
+  }catch(err){
+    console.error('Submit error:',err);
+    showToast('❌ '+(err.message||'មានបញ្ហា'),'error');
+    btn.classList.remove('loading');btn.innerHTML='📤 បញ្ជូនពាក្យ';
   }
 }
 
-// ── TOAST ────────────────────────────────────────────────────
-function showToast(msg, type = '') {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = `toast ${type} show`;
-  setTimeout(() => t.classList.remove('show'), 3500);
+function showToast(msg,type=''){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className=`toast ${type} show`;
+  setTimeout(()=>t.classList.remove('show'),3500);
 }
 
-// ── INIT ─────────────────────────────────────────────────────
-loadProfile();
-updateTimer();
-loadJobs(); // Load real jobs from Supabase on start
+loadProfile();updateTimer();loadJobs();
 </script>
 </body>
 </html>
