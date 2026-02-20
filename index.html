@@ -3,8 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>VoiceApply KH</title>
+<title>VoiceApply KH 🎙</title>
 <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@300;400;500;600;700&family=Hanuman:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root {
     --red: #E63946;
@@ -21,634 +22,161 @@
     --green: #06D6A0;
     --radius: 16px;
   }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   body {
-    background: var(--dark);
-    color: var(--text);
-    font-family: 'Kantumruy Pro', 'Hanuman', sans-serif;
-    min-height: 100vh;
-    overflow-x: hidden;
-    max-width: 420px;
-    margin: 0 auto;
+    background:var(--dark); color:var(--text);
+    font-family:'Kantumruy Pro','Hanuman',sans-serif;
+    min-height:100vh; overflow-x:hidden;
+    max-width:420px; margin:0 auto;
   }
 
   /* ── SCREENS ── */
-  .screen {
-    display: none;
-    min-height: 100vh;
-    flex-direction: column;
-    animation: fadeUp 0.35s ease forwards;
-  }
-  .screen.active { display: flex; }
-
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(18px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
+  .screen { display:none; min-height:100vh; flex-direction:column; animation:fadeUp .35s ease forwards; }
+  .screen.active { display:flex; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
 
   /* ── HEADER ── */
   .header {
-    padding: 20px 20px 16px;
-    background: var(--dark);
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    border-bottom: 1px solid var(--border);
+    padding:16px 20px 14px; background:var(--dark);
+    position:sticky; top:0; z-index:10;
+    border-bottom:1px solid var(--border);
   }
-  .header-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .logo-icon {
-    width: 36px; height: 36px;
-    background: var(--red);
-    border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 18px;
-  }
-  .logo-text {
-    font-size: 18px;
-    font-weight: 700;
-    letter-spacing: -0.3px;
-  }
-  .logo-text span { color: var(--red); }
-  .badge {
-    background: var(--gold);
-    color: var(--dark);
-    font-size: 11px;
-    font-weight: 700;
-    padding: 3px 8px;
-    border-radius: 20px;
-  }
-  .header-sub {
-    margin-top: 8px;
-    font-size: 13px;
-    color: var(--text-muted);
-  }
+  .header-top { display:flex; align-items:center; justify-content:space-between; }
+  .logo { display:flex; align-items:center; gap:10px; }
+  .logo-icon { width:36px;height:36px;background:var(--red);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px; }
+  .logo-text { font-size:18px; font-weight:700; }
+  .logo-text span { color:var(--red); }
+  .badge { background:var(--gold);color:var(--dark);font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px; }
+  .header-sub { margin-top:6px; font-size:13px; color:var(--text-muted); }
+  .back-btn { background:none;border:none;color:var(--text-muted);font-size:14px;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:6px;padding:0; }
+
+  /* ── LOADING ── */
+  .loading-wrap { display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:16px; }
+  .spinner { width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--red);border-radius:50%;animation:spin .8s linear infinite; }
+  @keyframes spin { to{transform:rotate(360deg)} }
+  .loading-text { font-size:14px;color:var(--text-muted); }
 
   /* ── JOB LIST ── */
-  .jobs-container {
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    flex: 1;
-  }
+  .jobs-container { padding:16px;display:flex;flex-direction:column;gap:14px;flex:1; }
+  .section-title { font-size:12px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;font-weight:600;padding:0 4px;margin-bottom:2px; }
+  .job-count { font-size:12px;color:var(--text-muted);text-align:center;padding:8px; }
 
-  .section-title {
-    font-size: 13px;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    font-weight: 600;
-    padding: 0 4px;
-    margin-bottom: 2px;
-  }
+  .job-card { background:var(--card);border-radius:var(--radius);padding:18px;border:1px solid var(--border);cursor:pointer;transition:all .2s;position:relative;overflow:hidden; }
+  .job-card::before { content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:var(--red);border-radius:4px 0 0 4px; }
+  .job-card:active { transform:scale(.98);border-color:var(--red); }
+  .job-header { display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px; }
+  .job-emoji { width:44px;height:44px;background:var(--dark3);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0; }
+  .job-urgency { background:rgba(230,57,70,.15);color:var(--red-light);font-size:11px;font-weight:600;padding:4px 8px;border-radius:20px;border:1px solid rgba(230,57,70,.3); }
+  .job-title { font-size:17px;font-weight:700;margin:10px 0 4px;line-height:1.3; }
+  .job-company { font-size:14px;color:var(--text-muted);margin-bottom:12px; }
+  .job-tags { display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px; }
+  .tag { background:var(--dark3);color:var(--text-muted);font-size:12px;padding:4px 10px;border-radius:20px;border:1px solid var(--border); }
+  .tag.highlight { background:rgba(255,183,3,.1);color:var(--gold);border-color:rgba(255,183,3,.3); }
+  .apply-btn { width:100%;background:var(--red);color:white;border:none;border-radius:12px;padding:13px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px; }
+  .apply-btn:active { background:var(--red-dark);transform:scale(.98); }
 
-  .job-card {
-    background: var(--card);
-    border-radius: var(--radius);
-    padding: 18px;
-    border: 1px solid var(--border);
-    cursor: pointer;
-    transition: all 0.2s ease;
-    position: relative;
-    overflow: hidden;
-  }
-  .job-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0;
-    width: 4px; height: 100%;
-    background: var(--red);
-    border-radius: 4px 0 0 4px;
-  }
-  .job-card:active { transform: scale(0.98); border-color: var(--red); }
+  /* ── FORM ── */
+  .form-container { padding:20px;flex:1;display:flex;flex-direction:column;gap:20px; }
+  .form-hero { background:linear-gradient(135deg,var(--red) 0%,var(--red-dark) 100%);border-radius:var(--radius);padding:20px;text-align:center; }
+  .form-hero-icon { font-size:36px;margin-bottom:8px; }
+  .form-hero-title { font-size:18px;font-weight:700;margin-bottom:4px; }
+  .form-hero-sub { font-size:13px;opacity:.85; }
+  .form-group { display:flex;flex-direction:column;gap:8px; }
+  .form-label { font-size:14px;font-weight:600;color:var(--text-muted); }
+  .form-input { background:var(--card);border:1.5px solid var(--border);border-radius:12px;padding:14px 16px;font-size:16px;font-family:inherit;color:var(--text);outline:none;transition:border-color .2s; }
+  .form-input:focus { border-color:var(--red); }
+  .form-input::placeholder { color:var(--text-muted); }
+  .form-select { background:var(--card);border:1.5px solid var(--border);border-radius:12px;padding:14px 16px;font-size:16px;font-family:inherit;color:var(--text);outline:none;transition:border-color .2s;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23888' d='M6 8L0 0h12z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 16px center; }
+  .form-select:focus { border-color:var(--red); }
+  .form-select option { background:var(--dark2); }
+  .next-btn { background:var(--red);color:white;border:none;border-radius:12px;padding:15px;font-size:16px;font-weight:700;font-family:inherit;cursor:pointer;transition:all .2s;margin-top:auto; }
+  .next-btn:active { background:var(--red-dark);transform:scale(.98); }
 
-  .job-header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    margin-bottom: 10px;
-  }
-  .job-emoji {
-    width: 44px; height: 44px;
-    background: var(--dark3);
-    border-radius: 12px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 22px;
-    flex-shrink: 0;
-  }
-  .job-urgency {
-    background: rgba(230, 57, 70, 0.15);
-    color: var(--red-light);
-    font-size: 11px;
-    font-weight: 600;
-    padding: 4px 8px;
-    border-radius: 20px;
-    border: 1px solid rgba(230, 57, 70, 0.3);
-  }
-  .job-title {
-    font-size: 17px;
-    font-weight: 700;
-    margin: 10px 0 4px;
-    line-height: 1.3;
-  }
-  .job-company {
-    font-size: 14px;
-    color: var(--text-muted);
-    margin-bottom: 12px;
-  }
-  .job-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-bottom: 14px;
-  }
-  .tag {
-    background: var(--dark3);
-    color: var(--text-muted);
-    font-size: 12px;
-    padding: 4px 10px;
-    border-radius: 20px;
-    border: 1px solid var(--border);
-  }
-  .tag.highlight {
-    background: rgba(255, 183, 3, 0.1);
-    color: var(--gold);
-    border-color: rgba(255, 183, 3, 0.3);
-  }
-  .apply-btn {
-    width: 100%;
-    background: var(--red);
-    color: white;
-    border: none;
-    border-radius: 12px;
-    padding: 13px;
-    font-size: 15px;
-    font-weight: 700;
-    font-family: inherit;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-  }
-  .apply-btn:active { background: var(--red-dark); transform: scale(0.98); }
+  /* ── VOICE ── */
+  .voice-container { padding:20px;flex:1;display:flex;flex-direction:column;align-items:center;gap:18px; }
+  .voice-job-card { width:100%;background:var(--card);border-radius:var(--radius);padding:16px;border:1px solid var(--border);display:flex;align-items:center;gap:12px; }
+  .voice-job-icon { width:42px;height:42px;background:var(--dark3);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0; }
+  .voice-job-info { flex:1; }
+  .voice-job-title { font-size:15px;font-weight:700; }
+  .voice-job-company { font-size:13px;color:var(--text-muted); }
 
-  /* ── BACK BUTTON ── */
-  .back-btn {
-    background: none;
-    border: none;
-    color: var(--text-muted);
-    font-size: 14px;
-    font-family: inherit;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 0;
-    margin-bottom: 8px;
-  }
+  .prompt-box { width:100%;background:rgba(255,183,3,.08);border:1px solid rgba(255,183,3,.25);border-radius:var(--radius);padding:16px; }
+  .prompt-title { font-size:12px;color:var(--gold);font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px; }
+  .prompt-text { font-size:15px;line-height:1.6; }
+  .prompt-hints { margin-top:10px;display:flex;flex-direction:column;gap:4px; }
+  .prompt-hint { font-size:13px;color:var(--text-muted);display:flex;align-items:center;gap:6px; }
+  .prompt-hint::before { content:'•';color:var(--gold); }
 
-  /* ── PROFILE SCREEN ── */
-  .form-container {
-    padding: 20px;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-  }
-  .form-hero {
-    background: linear-gradient(135deg, var(--red) 0%, var(--red-dark) 100%);
-    border-radius: var(--radius);
-    padding: 20px;
-    text-align: center;
-  }
-  .form-hero-icon { font-size: 36px; margin-bottom: 8px; }
-  .form-hero-title { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
-  .form-hero-sub { font-size: 13px; opacity: 0.85; }
+  .record-area { display:flex;flex-direction:column;align-items:center;gap:14px;width:100%; }
+  .timer-ring { position:relative;width:160px;height:160px;flex-shrink:0; }
+  .timer-ring svg { width:160px;height:160px;transform:rotate(-90deg);position:absolute;top:0;left:0;z-index:1; }
+  .timer-track { fill:none;stroke:var(--border);stroke-width:6; }
+  .timer-progress { fill:none;stroke:var(--red);stroke-width:6;stroke-linecap:round;stroke-dasharray:408;stroke-dashoffset:0;transition:stroke-dashoffset 1s linear,stroke .3s; }
+  .timer-center { position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;z-index:3;pointer-events:none; }
+  .timer-seconds { font-size:30px;font-weight:700;line-height:1;color:var(--text);text-shadow:0 1px 4px rgba(0,0,0,.8); }
+  .timer-label { font-size:11px;color:var(--text-muted); }
+  .record-btn { width:88px;height:88px;border-radius:50%;background:var(--red);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:32px;transition:all .2s;position:absolute;inset:0;margin:auto;z-index:2; }
+  .record-btn.recording { animation:pulse 1.5s infinite;background:var(--red-dark); }
+  @keyframes pulse { 0%{box-shadow:0 0 0 0 rgba(230,57,70,.5)} 70%{box-shadow:0 0 0 20px rgba(230,57,70,0)} 100%{box-shadow:0 0 0 0 rgba(230,57,70,0)} }
+  .record-btn:active { transform:scale(.93); }
 
-  .form-group { display: flex; flex-direction: column; gap: 8px; }
-  .form-label {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text-muted);
-    letter-spacing: 0.3px;
-  }
-  .form-input {
-    background: var(--card);
-    border: 1.5px solid var(--border);
-    border-radius: 12px;
-    padding: 14px 16px;
-    font-size: 16px;
-    font-family: inherit;
-    color: var(--text);
-    outline: none;
-    transition: border-color 0.2s;
-  }
-  .form-input:focus { border-color: var(--red); }
-  .form-input::placeholder { color: var(--text-muted); }
+  .record-status { font-size:14px;color:var(--text-muted);text-align:center;min-height:20px; }
+  .record-status.recording { color:var(--red-light);font-weight:600; }
+  .record-status.done { color:var(--green);font-weight:600; }
 
-  .form-select {
-    background: var(--card);
-    border: 1.5px solid var(--border);
-    border-radius: 12px;
-    padding: 14px 16px;
-    font-size: 16px;
-    font-family: inherit;
-    color: var(--text);
-    outline: none;
-    transition: border-color 0.2s;
-    appearance: none;
-    -webkit-appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23888' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 16px center;
-  }
-  .form-select:focus { border-color: var(--red); }
-  .form-select option { background: var(--dark2); }
+  .waveform { display:flex;align-items:center;justify-content:center;gap:3px;height:40px;width:100%;opacity:0;transition:opacity .3s; }
+  .waveform.active { opacity:1; }
+  .wave-bar { width:3px;background:var(--red);border-radius:3px;animation:wave .8s ease-in-out infinite;min-height:4px; }
+  @keyframes wave { 0%,100%{height:6px} 50%{height:28px} }
 
-  .next-btn {
-    background: var(--red);
-    color: white;
-    border: none;
-    border-radius: 12px;
-    padding: 15px;
-    font-size: 16px;
-    font-weight: 700;
-    font-family: inherit;
-    cursor: pointer;
-    transition: all 0.2s;
-    margin-top: auto;
-  }
-  .next-btn:active { background: var(--red-dark); transform: scale(0.98); }
-  .next-btn:disabled { background: var(--border); color: var(--text-muted); cursor: not-allowed; transform: none; }
+  .playback-section { width:100%;background:var(--card);border-radius:var(--radius);padding:14px 16px;border:1px solid var(--border);display:none;align-items:center;gap:12px; }
+  .playback-section.visible { display:flex; }
+  .play-btn { width:40px;height:40px;background:var(--green);border:none;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;transition:transform .2s; }
+  .play-btn:active { transform:scale(.92); }
+  .playback-info { flex:1; }
+  .playback-title { font-size:14px;font-weight:600;color:var(--green); }
+  .playback-sub { font-size:12px;color:var(--text-muted); }
+  .rerecord-btn { background:none;border:1px solid var(--border);color:var(--text-muted);font-size:12px;font-family:inherit;padding:6px 10px;border-radius:8px;cursor:pointer; }
 
-  /* ── VOICE SCREEN ── */
-  .voice-container {
-    padding: 20px;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
-  }
+  .submit-btn { width:100%;background:linear-gradient(135deg,var(--red) 0%,var(--red-dark) 100%);color:white;border:none;border-radius:12px;padding:16px;font-size:16px;font-weight:700;font-family:inherit;cursor:pointer;transition:all .2s;display:none;align-items:center;justify-content:center;gap:8px;margin-top:auto;box-shadow:0 4px 20px rgba(230,57,70,.3); }
+  .submit-btn.visible { display:flex; }
+  .submit-btn:active { transform:scale(.98); }
+  .submit-btn.loading { opacity:.7;cursor:not-allowed; }
 
-  .voice-job-card {
-    width: 100%;
-    background: var(--card);
-    border-radius: var(--radius);
-    padding: 16px;
-    border: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  .voice-job-icon {
-    width: 42px; height: 42px;
-    background: var(--dark3);
-    border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 20px;
-    flex-shrink: 0;
-  }
-  .voice-job-info { flex: 1; }
-  .voice-job-title { font-size: 15px; font-weight: 700; }
-  .voice-job-company { font-size: 13px; color: var(--text-muted); }
+  /* ── SUCCESS ── */
+  .success-container { padding:20px;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;text-align:center; }
+  .success-anim { width:100px;height:100px;background:rgba(6,214,160,.1);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:48px;animation:popIn .5s cubic-bezier(.175,.885,.32,1.275) forwards;border:2px solid rgba(6,214,160,.3); }
+  @keyframes popIn { from{transform:scale(0);opacity:0} to{transform:scale(1);opacity:1} }
+  .success-title { font-size:24px;font-weight:700;line-height:1.3; }
+  .success-title span { color:var(--green); }
+  .success-sub { font-size:15px;color:var(--text-muted);line-height:1.7;max-width:300px; }
+  .success-details { width:100%;background:var(--card);border-radius:var(--radius);padding:18px;border:1px solid var(--border);text-align:left;display:flex;flex-direction:column;gap:12px; }
+  .success-row { display:flex;align-items:center;gap:12px; }
+  .success-row-icon { width:32px;height:32px;background:var(--dark3);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0; }
+  .success-row-text { font-size:14px;color:var(--text-muted); }
+  .success-row-text strong { color:var(--text);display:block; }
+  .home-btn { width:100%;background:var(--card);color:var(--text);border:1.5px solid var(--border);border-radius:12px;padding:14px;font-size:15px;font-weight:600;font-family:inherit;cursor:pointer;transition:all .2s;margin-top:8px; }
+  .home-btn:active { border-color:var(--red);color:var(--red); }
 
-  .prompt-box {
-    width: 100%;
-    background: rgba(255, 183, 3, 0.08);
-    border: 1px solid rgba(255, 183, 3, 0.25);
-    border-radius: var(--radius);
-    padding: 16px;
-  }
-  .prompt-title {
-    font-size: 12px;
-    color: var(--gold);
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    margin-bottom: 8px;
-  }
-  .prompt-text {
-    font-size: 15px;
-    line-height: 1.6;
-    color: var(--text);
-  }
-  .prompt-hints {
-    margin-top: 10px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-  .prompt-hint {
-    font-size: 13px;
-    color: var(--text-muted);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .prompt-hint::before { content: '•'; color: var(--gold); }
-
-  /* Record Button Area */
-  .record-area {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 16px;
-    width: 100%;
-  }
-
-  .timer-ring {
-    position: relative;
-    width: 160px; height: 160px;
-    flex-shrink: 0;
-  }
-  .timer-ring svg {
-    width: 160px; height: 160px;
-    transform: rotate(-90deg);
-    position: absolute;
-    top: 0; left: 0;
-    z-index: 1;
-  }
-  .timer-track { fill: none; stroke: var(--border); stroke-width: 6; }
-  .timer-progress {
-    fill: none;
-    stroke: var(--red);
-    stroke-width: 6;
-    stroke-linecap: round;
-    stroke-dasharray: 408;
-    stroke-dashoffset: 0;
-    transition: stroke-dashoffset 1s linear, stroke 0.3s;
-  }
-  .timer-center {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 2px;
-    z-index: 3;
-    pointer-events: none;
-  }
-  .timer-seconds {
-    font-size: 30px;
-    font-weight: 700;
-    line-height: 1;
-    transition: color 0.3s;
-    color: var(--text);
-    text-shadow: 0 1px 4px rgba(0,0,0,0.8);
-  }
-  .timer-label {
-    font-size: 11px;
-    color: var(--text-muted);
-    font-weight: 500;
-  }
-
-  .record-btn {
-    width: 88px; height: 88px;
-    border-radius: 50%;
-    background: var(--red);
-    border: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 32px;
-    transition: all 0.2s;
-    box-shadow: 0 0 0 0 rgba(230, 57, 70, 0.4);
-    position: absolute;
-    inset: 0;
-    margin: auto;
-    z-index: 2;
-  }
-  .record-btn.recording {
-    animation: pulse 1.5s infinite;
-    background: var(--red-dark);
-  }
-  @keyframes pulse {
-    0%   { box-shadow: 0 0 0 0 rgba(230, 57, 70, 0.5); }
-    70%  { box-shadow: 0 0 0 20px rgba(230, 57, 70, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(230, 57, 70, 0); }
-  }
-  .record-btn:active { transform: scale(0.93); }
-
-  .record-status {
-    font-size: 14px;
-    color: var(--text-muted);
-    text-align: center;
-    min-height: 20px;
-  }
-  .record-status.recording { color: var(--red-light); font-weight: 600; }
-  .record-status.done { color: var(--green); font-weight: 600; }
-
-  /* Waveform */
-  .waveform {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 3px;
-    height: 40px;
-    width: 100%;
-    opacity: 0;
-    transition: opacity 0.3s;
-  }
-  .waveform.active { opacity: 1; }
-  .wave-bar {
-    width: 3px;
-    background: var(--red);
-    border-radius: 3px;
-    animation: wave 0.8s ease-in-out infinite;
-    min-height: 4px;
-  }
-  @keyframes wave {
-    0%, 100% { height: 6px; }
-    50% { height: 28px; }
-  }
-
-  /* Playback */
-  .playback-section {
-    width: 100%;
-    background: var(--card);
-    border-radius: var(--radius);
-    padding: 14px 16px;
-    border: 1px solid var(--border);
-    display: none;
-    align-items: center;
-    gap: 12px;
-  }
-  .playback-section.visible { display: flex; }
-  .play-btn {
-    width: 40px; height: 40px;
-    background: var(--green);
-    border: none;
-    border-radius: 50%;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 16px;
-    flex-shrink: 0;
-    transition: transform 0.2s;
-  }
-  .play-btn:active { transform: scale(0.92); }
-  .playback-info { flex: 1; }
-  .playback-title { font-size: 14px; font-weight: 600; color: var(--green); }
-  .playback-sub { font-size: 12px; color: var(--text-muted); }
-  .rerecord-btn {
-    background: none;
-    border: 1px solid var(--border);
-    color: var(--text-muted);
-    font-size: 12px;
-    font-family: inherit;
-    padding: 6px 10px;
-    border-radius: 8px;
-    cursor: pointer;
-  }
-
-  .submit-btn {
-    width: 100%;
-    background: linear-gradient(135deg, var(--red) 0%, var(--red-dark) 100%);
-    color: white;
-    border: none;
-    border-radius: 12px;
-    padding: 16px;
-    font-size: 16px;
-    font-weight: 700;
-    font-family: inherit;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    margin-top: auto;
-    box-shadow: 0 4px 20px rgba(230, 57, 70, 0.3);
-  }
-  .submit-btn.visible { display: flex; }
-  .submit-btn:active { transform: scale(0.98); }
-  .submit-btn.loading { opacity: 0.7; cursor: not-allowed; }
-
-  /* ── SUCCESS SCREEN ── */
-  .success-container {
-    padding: 20px;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 20px;
-    text-align: center;
-  }
-  .success-anim {
-    width: 100px; height: 100px;
-    background: rgba(6, 214, 160, 0.1);
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 48px;
-    animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-    border: 2px solid rgba(6, 214, 160, 0.3);
-  }
-  @keyframes popIn {
-    from { transform: scale(0); opacity: 0; }
-    to   { transform: scale(1); opacity: 1; }
-  }
-  .success-title {
-    font-size: 24px;
-    font-weight: 700;
-    line-height: 1.3;
-  }
-  .success-title span { color: var(--green); }
-  .success-sub {
-    font-size: 15px;
-    color: var(--text-muted);
-    line-height: 1.7;
-    max-width: 300px;
-  }
-  .success-details {
-    width: 100%;
-    background: var(--card);
-    border-radius: var(--radius);
-    padding: 18px;
-    border: 1px solid var(--border);
-    text-align: left;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-  .success-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  .success-row-icon {
-    width: 32px; height: 32px;
-    background: var(--dark3);
-    border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 16px;
-    flex-shrink: 0;
-  }
-  .success-row-text { font-size: 14px; color: var(--text-muted); }
-  .success-row-text strong { color: var(--text); display: block; }
-
-  .home-btn {
-    width: 100%;
-    background: var(--card);
-    color: var(--text);
-    border: 1.5px solid var(--border);
-    border-radius: 12px;
-    padding: 14px;
-    font-size: 15px;
-    font-weight: 600;
-    font-family: inherit;
-    cursor: pointer;
-    transition: all 0.2s;
-    margin-top: 8px;
-  }
-  .home-btn:active { border-color: var(--red); color: var(--red); }
+  /* ── ERROR STATE ── */
+  .error-wrap { display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:16px;padding:20px;text-align:center; }
+  .error-icon { font-size:48px; }
+  .error-title { font-size:18px;font-weight:700;color:var(--red); }
+  .error-sub { font-size:14px;color:var(--text-muted);line-height:1.6; }
+  .retry-btn { background:var(--red);color:white;border:none;border-radius:12px;padding:12px 24px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer; }
 
   /* ── TOAST ── */
-  .toast {
-    position: fixed;
-    bottom: 24px;
-    left: 50%;
-    transform: translateX(-50%) translateY(100px);
-    background: var(--dark3);
-    border: 1px solid var(--border);
-    color: var(--text);
-    padding: 12px 20px;
-    border-radius: 12px;
-    font-size: 14px;
-    font-weight: 500;
-    z-index: 999;
-    transition: transform 0.3s ease;
-    white-space: nowrap;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-  }
-  .toast.show { transform: translateX(-50%) translateY(0); }
-  .toast.error { border-color: var(--red); color: var(--red-light); }
-  .toast.success { border-color: var(--green); color: var(--green); }
+  .toast { position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--dark3);border:1px solid var(--border);color:var(--text);padding:12px 20px;border-radius:12px;font-size:14px;font-weight:500;z-index:999;transition:transform .3s ease;white-space:nowrap;box-shadow:0 8px 24px rgba(0,0,0,.4); }
+  .toast.show { transform:translateX(-50%) translateY(0); }
+  .toast.error { border-color:var(--red);color:var(--red-light); }
+  .toast.success { border-color:var(--green);color:var(--green); }
 
-  /* Scrollbar */
-  ::-webkit-scrollbar { width: 0; }
+  ::-webkit-scrollbar { width:0; }
 </style>
 </head>
 <body>
 
-<!-- ═══════════════════════════════
-     SCREEN 1: JOB LIST
-════════════════════════════════ -->
+<!-- ══ SCREEN 1: JOB LIST ══════════════════════════════════ -->
 <div class="screen active" id="screen-jobs">
   <div class="header">
     <div class="header-top">
@@ -658,91 +186,38 @@
       </div>
       <div class="badge">🇰🇭 កម្ពុជា</div>
     </div>
-    <div class="header-sub">រកការងារ · ដាក់ពាក្យក្នុង ៣០ វិនាទី</div>
+    <div class="header-sub">រកការងារ · ដាក់ពាក្យក្នុង ៦០ វិនាទី</div>
   </div>
-
-  <div class="jobs-container">
-    <div class="section-title">💼 មុខងារដែលមាន</div>
-
-    <!-- Job 1 -->
-    <div class="job-card" onclick="selectJob(0)">
-      <div class="job-header">
-        <div class="job-emoji">🍽️</div>
-        <div class="job-urgency">⚡ ត្រូវការបន្ទាន់</div>
-      </div>
-      <div class="job-title">អ្នកបម្រើតុ / Waiter</div>
-      <div class="job-company">☕ The Café BKK1 · ភ្នំពេញ</div>
-      <div class="job-tags">
-        <span class="tag">🕐 Full-time</span>
-        <span class="tag">📍 BKK1</span>
-        <span class="tag highlight">💵 $200-250/ខែ</span>
-      </div>
-      <button class="apply-btn">🎙 ដាក់ពាក្យឥឡូវ</button>
+  <div class="jobs-container" id="jobs-list">
+    <!-- Jobs loaded dynamically -->
+    <div class="loading-wrap">
+      <div class="spinner"></div>
+      <div class="loading-text">កំពុងទាញការងារ...</div>
     </div>
-
-    <!-- Job 2 -->
-    <div class="job-card" onclick="selectJob(1)">
-      <div class="job-header">
-        <div class="job-emoji">👨‍🍳</div>
-        <div class="job-urgency">🔥 Hot Job</div>
-      </div>
-      <div class="job-title">អ្នកចម្អិនម្ហូប / Cook</div>
-      <div class="job-company">🍜 Noodle House Toul Tom Poung · ភ្នំពេញ</div>
-      <div class="job-tags">
-        <span class="tag">🕐 Full-time</span>
-        <span class="tag">📍 TTP</span>
-        <span class="tag highlight">💵 $250-350/ខែ</span>
-      </div>
-      <button class="apply-btn">🎙 ដាក់ពាក្យឥឡូវ</button>
-    </div>
-
-    <!-- Job 3 -->
-    <div class="job-card" onclick="selectJob(2)">
-      <div class="job-header">
-        <div class="job-emoji">🏨</div>
-        <div class="job-urgency">✅ ទំហំ ៣ នាក់</div>
-      </div>
-      <div class="job-title">អ្នកសំអាត / Housekeeping</div>
-      <div class="job-company">🌟 Star Hotel Riverside · ភ្នំពេញ</div>
-      <div class="job-tags">
-        <span class="tag">🕐 Full-time</span>
-        <span class="tag">📍 Riverside</span>
-        <span class="tag highlight">💵 $180-220/ខែ</span>
-      </div>
-      <button class="apply-btn">🎙 ដាក់ពាក្យឥឡូវ</button>
-    </div>
-
   </div>
 </div>
 
-
-<!-- ═══════════════════════════════
-     SCREEN 2: MINI PROFILE
-════════════════════════════════ -->
+<!-- ══ SCREEN 2: MINI PROFILE ══════════════════════════════ -->
 <div class="screen" id="screen-profile">
   <div class="header">
     <div class="header-top">
       <button class="back-btn" onclick="goBack('screen-jobs')">← ត្រឡប់</button>
     </div>
   </div>
-
   <div class="form-container">
     <div class="form-hero">
       <div class="form-hero-icon">👤</div>
       <div class="form-hero-title">បំពេញព័ត៌មានខ្លី</div>
       <div class="form-hero-sub">តែ ១ ដង · រក្សាទុកស្វ័យប្រវត្តិ</div>
     </div>
-
     <div class="form-group">
       <label class="form-label">📛 ឈ្មោះពេញ</label>
-      <input class="form-input" type="text" id="input-name" placeholder="ឧ. សុខា ចាន់" />
+      <input class="form-input" type="text" id="input-name" placeholder="ឧ. សុខា ចាន់"/>
     </div>
-
     <div class="form-group">
       <label class="form-label">📱 លេខទូរស័ព្ទ</label>
-      <input class="form-input" type="tel" id="input-phone" placeholder="ឧ. 012 345 678" />
+      <input class="form-input" type="tel" id="input-phone" placeholder="ឧ. 012 345 678"/>
     </div>
-
     <div class="form-group">
       <label class="form-label">💼 មុខងារដែលចង់បាន</label>
       <select class="form-select" id="input-position">
@@ -752,39 +227,28 @@
         <option value="អ្នកសំអាត">🧹 អ្នកសំអាត (Housekeeping)</option>
         <option value="ម៉ូតូឌុប">🏍️ ម៉ូតូឌុប (Driver)</option>
         <option value="អ្នកលក់">🛍️ អ្នកលក់ (Sales)</option>
-        <option value="ព្រមទាំងអស់">✅ ទទួលយកគ្រប់មុខ</option>
+        <option value="ទទួលយកគ្រប់មុខ">✅ ទទួលយកគ្រប់មុខ</option>
       </select>
     </div>
-
-    <button class="next-btn" id="next-to-voice" onclick="goToVoice()">
-      បន្ទាប់ → ថតសំឡេង 🎙
-    </button>
+    <button class="next-btn" onclick="goToVoice()">បន្ទាប់ → ថតសំឡេង 🎙</button>
   </div>
 </div>
 
-
-<!-- ═══════════════════════════════
-     SCREEN 3: VOICE RECORDER
-════════════════════════════════ -->
+<!-- ══ SCREEN 3: VOICE RECORDER ════════════════════════════ -->
 <div class="screen" id="screen-voice">
   <div class="header">
     <div class="header-top">
       <button class="back-btn" onclick="goBack('screen-profile')">← ត្រឡប់</button>
     </div>
   </div>
-
   <div class="voice-container">
-
-    <!-- Job being applied to -->
-    <div class="voice-job-card" id="voice-job-display">
+    <div class="voice-job-card">
       <div class="voice-job-icon" id="vj-emoji">🍽️</div>
       <div class="voice-job-info">
-        <div class="voice-job-title" id="vj-title">អ្នកបម្រើតុ</div>
-        <div class="voice-job-company" id="vj-company">The Café BKK1</div>
+        <div class="voice-job-title" id="vj-title">—</div>
+        <div class="voice-job-company" id="vj-company">—</div>
       </div>
     </div>
-
-    <!-- Prompt -->
     <div class="prompt-box">
       <div class="prompt-title">🎯 និយាយថា...</div>
       <div class="prompt-text">ចូររៀបរាប់ខ្លួនអ្នកក្នុង ៦០ វិនាទី</div>
@@ -794,13 +258,11 @@
         <div class="prompt-hint">ហេតុអ្វីអ្នកល្អសម្រាប់មុខងារនេះ</div>
       </div>
     </div>
-
-    <!-- Timer + Record Button -->
     <div class="record-area">
       <div class="timer-ring">
-        <svg viewBox="0 0 140 140">
-          <circle class="timer-track" cx="70" cy="70" r="65"/>
-          <circle class="timer-progress" id="timer-circle" cx="70" cy="70" r="65"/>
+        <svg viewBox="0 0 160 160">
+          <circle class="timer-track" cx="80" cy="80" r="65"/>
+          <circle class="timer-progress" id="timer-circle" cx="80" cy="80" r="65"/>
         </svg>
         <div class="timer-center">
           <div class="timer-seconds" id="timer-display">60</div>
@@ -808,26 +270,22 @@
         </div>
         <button class="record-btn" id="record-btn" onclick="toggleRecording()">🎙</button>
       </div>
-
       <div class="waveform" id="waveform">
         <div class="wave-bar" style="animation-delay:0s"></div>
-        <div class="wave-bar" style="animation-delay:0.1s"></div>
-        <div class="wave-bar" style="animation-delay:0.2s"></div>
-        <div class="wave-bar" style="animation-delay:0.3s"></div>
-        <div class="wave-bar" style="animation-delay:0.15s"></div>
-        <div class="wave-bar" style="animation-delay:0.05s"></div>
-        <div class="wave-bar" style="animation-delay:0.25s"></div>
-        <div class="wave-bar" style="animation-delay:0.1s"></div>
-        <div class="wave-bar" style="animation-delay:0.35s"></div>
-        <div class="wave-bar" style="animation-delay:0.2s"></div>
+        <div class="wave-bar" style="animation-delay:.1s"></div>
+        <div class="wave-bar" style="animation-delay:.2s"></div>
+        <div class="wave-bar" style="animation-delay:.3s"></div>
+        <div class="wave-bar" style="animation-delay:.15s"></div>
+        <div class="wave-bar" style="animation-delay:.05s"></div>
+        <div class="wave-bar" style="animation-delay:.25s"></div>
+        <div class="wave-bar" style="animation-delay:.1s"></div>
+        <div class="wave-bar" style="animation-delay:.35s"></div>
+        <div class="wave-bar" style="animation-delay:.2s"></div>
         <div class="wave-bar" style="animation-delay:0s"></div>
-        <div class="wave-bar" style="animation-delay:0.15s"></div>
+        <div class="wave-bar" style="animation-delay:.15s"></div>
       </div>
-
       <div class="record-status" id="record-status">ចុច 🎙 ដើម្បីចាប់ផ្តើមថត</div>
     </div>
-
-    <!-- Playback -->
     <div class="playback-section" id="playback-section">
       <button class="play-btn" onclick="playRecording()">▶</button>
       <div class="playback-info">
@@ -836,134 +294,157 @@
       </div>
       <button class="rerecord-btn" onclick="resetRecording()">ថតម្តងទៀត</button>
     </div>
-
-    <!-- Submit -->
     <button class="submit-btn" id="submit-btn" onclick="submitApplication()">
       📤 បញ្ជូនពាក្យ
     </button>
-
   </div>
 </div>
 
-
-<!-- ═══════════════════════════════
-     SCREEN 4: SUCCESS
-════════════════════════════════ -->
+<!-- ══ SCREEN 4: SUCCESS ════════════════════════════════════ -->
 <div class="screen" id="screen-success">
   <div class="success-container">
     <div class="success-anim">✅</div>
-
     <div>
       <div class="success-title">បានបញ្ជូន<br><span>រួចរាល់ហើយ!</span></div>
     </div>
-
     <div class="success-sub">
-      អ្នកជ្រើសរើសបុគ្គលិកនឹងទាក់ទងអ្នកតាម Telegram ឬទូរស័ព្ទក្នុងពេលឆាប់ៗ
+      អ្នកជ្រើសរើសបុគ្គលិកនឹងទាក់ទងអ្នក<br>តាម Telegram ឬទូរស័ព្ទក្នុងពេលឆាប់ៗ 🙏
     </div>
-
     <div class="success-details">
       <div class="success-row">
         <div class="success-row-icon">💼</div>
-        <div class="success-row-text">
-          <strong id="success-job">—</strong>
-          មុខងារដែលបានដាក់ពាក្យ
-        </div>
+        <div class="success-row-text"><strong id="success-job">—</strong>មុខងារដែលបានដាក់ពាក្យ</div>
       </div>
       <div class="success-row">
         <div class="success-row-icon">👤</div>
-        <div class="success-row-text">
-          <strong id="success-name">—</strong>
-          ឈ្មោះរបស់អ្នក
-        </div>
+        <div class="success-row-text"><strong id="success-name">—</strong>ឈ្មោះរបស់អ្នក</div>
       </div>
       <div class="success-row">
         <div class="success-row-icon">📱</div>
-        <div class="success-row-text">
-          <strong id="success-phone">—</strong>
-          លេខទូរស័ព្ទ
-        </div>
+        <div class="success-row-text"><strong id="success-phone">—</strong>លេខទូរស័ព្ទ</div>
       </div>
       <div class="success-row">
         <div class="success-row-icon">🎙</div>
-        <div class="success-row-text">
-          <strong>បញ្ជូនសំឡេងរួច</strong>
-          អ្នកជ្រើសរើសនឹងស្តាប់ពាក្យអ្នក
-        </div>
+        <div class="success-row-text"><strong>បញ្ជូនសំឡេងរួច ✅</strong>អ្នកជ្រើសរើសនឹងស្តាប់ពាក្យអ្នក</div>
       </div>
     </div>
-
-    <button class="home-btn" onclick="goHome()">
-      🔍 មើលការងារផ្សេងទៀត
-    </button>
+    <button class="home-btn" onclick="goHome()">🔍 មើលការងារផ្សេងទៀត</button>
   </div>
 </div>
 
-<!-- Toast -->
 <div class="toast" id="toast"></div>
 
-<!-- ═══════════════════════════════
-     JAVASCRIPT
-════════════════════════════════ -->
+<!-- ══ JAVASCRIPT ═══════════════════════════════════════════ -->
 <script>
-// ── CONFIG ──────────────────────
-const BOT_TOKEN = '8321526997:AAFSedCdvaRGmFAsiN0edBbMs6BJwMfW9Zk';
-const CHAT_ID   = '96891582';
-
-// ── JOB DATA ────────────────────
-const JOBS = [
-  { emoji: '🍽️', title: 'អ្នកបម្រើតុ / Waiter',        company: 'The Café BKK1',           location: 'BKK1' },
-  { emoji: '👨‍🍳', title: 'អ្នកចម្អិនម្ហូប / Cook',      company: 'Noodle House Toul Tom Poung', location: 'TTP' },
-  { emoji: '🏨', title: 'អ្នកសំអាត / Housekeeping',   company: 'Star Hotel Riverside',      location: 'Riverside' },
-];
-
-// ── STATE ───────────────────────
-let selectedJob     = null;
-let mediaRecorder   = null;
-let audioChunks     = [];
-let audioBlob       = null;
-let audioURL        = null;
-let audioPlayer     = null;
-let isRecording     = false;
-let timerInterval   = null;
-let secondsLeft     = 60;
+// ── CONFIG ──────────────────────────────────────────────────
+const SUPABASE_URL  = 'https://hqcfmqbzfrjjgdcclomx.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhxY2ZtcWJ6ZnJqamdkY2Nsb214Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzMTMxMzUsImV4cCI6MjA4Njg4OTEzNX0.qosctxapm1JMhpL7xjG9CryrlJrZ7TSWrAsWDiQR1S0';
+const BOT_TOKEN     = '8321526997:AAFSedCdvaRGmFAsiN0edBbMs6BJwMfW9Zk';
+const CHAT_ID       = '96891582';
 const TOTAL_SECS    = 60;
-const CIRCUMFERENCE = 408; // 2 * π * 65
+const CIRCUMFERENCE = 408;
 
-// ── PROFILE (localStorage) ──────
-function loadProfile() {
-  const p = JSON.parse(localStorage.getItem('va_profile') || '{}');
-  if (p.name)  document.getElementById('input-name').value  = p.name;
-  if (p.phone) document.getElementById('input-phone').value = p.phone;
-  if (p.pos)   document.getElementById('input-position').value = p.pos;
-}
-function saveProfile() {
-  localStorage.setItem('va_profile', JSON.stringify({
-    name:  document.getElementById('input-name').value.trim(),
-    phone: document.getElementById('input-phone').value.trim(),
-    pos:   document.getElementById('input-position').value,
-  }));
-}
+// ── INIT SUPABASE ───────────────────────────────────────────
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_ANON);
 
-// ── NAVIGATION ──────────────────
+// ── STATE ───────────────────────────────────────────────────
+let selectedJob   = null;
+let mediaRecorder = null;
+let audioChunks   = [];
+let audioBlob     = null;
+let audioURL      = null;
+let audioPlayer   = null;
+let isRecording   = false;
+let timerInterval = null;
+let secondsLeft   = TOTAL_SECS;
+let recordedSecs  = 0;
+
+// ── NAVIGATION ──────────────────────────────────────────────
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   window.scrollTo(0, 0);
 }
 function goBack(id) { showScreen(id); }
-function goHome()   {
-  resetRecording();
-  showScreen('screen-jobs');
+function goHome()   { resetRecording(); showScreen('screen-jobs'); }
+
+// ── LOAD JOBS FROM SUPABASE ─────────────────────────────────
+async function loadJobs() {
+  const container = document.getElementById('jobs-list');
+  try {
+    const { data: jobs, error } = await db
+      .from('jobs')
+      .select('*')
+      .eq('status', 'active')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    if (!jobs || jobs.length === 0) {
+      container.innerHTML = `
+        <div class="error-wrap">
+          <div class="error-icon">📭</div>
+          <div class="error-title">មិនមានការងារថ្មី</div>
+          <div class="error-sub">សូមមើលម្តងទៀតនៅពេលក្រោយ</div>
+        </div>`;
+      return;
+    }
+
+    container.innerHTML = `<div class="section-title">💼 មុខងារដែលមាន (${jobs.length})</div>`;
+    jobs.forEach((job, idx) => {
+      const card = document.createElement('div');
+      card.className = 'job-card';
+      card.innerHTML = `
+        <div class="job-header">
+          <div class="job-emoji">${job.emoji || '💼'}</div>
+          ${job.urgency ? `<div class="job-urgency">⚡ ${job.urgency}</div>` : ''}
+        </div>
+        <div class="job-title">${job.title_km}</div>
+        <div class="job-company">🏢 ${job.company_km} · ${job.location}</div>
+        <div class="job-tags">
+          <span class="tag">🕐 Full-time</span>
+          <span class="tag">📍 ${job.location}</span>
+          ${job.salary_range ? `<span class="tag highlight">💵 ${job.salary_range}</span>` : ''}
+        </div>
+        <button class="apply-btn" onclick="selectJob('${job.id}')">🎙 ដាក់ពាក្យឥឡូវ</button>`;
+      container.appendChild(card);
+    });
+
+  } catch (err) {
+    console.error('Load jobs error:', err);
+    container.innerHTML = `
+      <div class="error-wrap">
+        <div class="error-icon">⚠️</div>
+        <div class="error-title">មានបញ្ហាក្នុងការទាញការងារ</div>
+        <div class="error-sub">${err.message || 'សូមពិនិត្យការតភ្ជាប់អ៊ីនធឺណិត'}</div>
+        <button class="retry-btn" onclick="loadJobs()">ព្យាយាមម្តងទៀត</button>
+      </div>`;
+  }
 }
 
-// ── JOB SELECT ──────────────────
-function selectJob(idx) {
-  selectedJob = JOBS[idx];
+// ── SELECT JOB ──────────────────────────────────────────────
+async function selectJob(jobId) {
+  // Fetch job details
+  const { data: job } = await db.from('jobs').select('*').eq('id', jobId).single();
+  if (!job) { showToast('⚠️ រកមិនឃើញការងារ', 'error'); return; }
+  selectedJob = job;
   loadProfile();
   showScreen('screen-profile');
 }
 
-// ── PROFILE → VOICE ─────────────
+// ── PROFILE (localStorage + Supabase) ──────────────────────
+function loadProfile() {
+  const p = JSON.parse(localStorage.getItem('va_profile') || '{}');
+  if (p.name)  document.getElementById('input-name').value  = p.name;
+  if (p.phone) document.getElementById('input-phone').value = p.phone;
+  if (p.pos)   document.getElementById('input-position').value = p.pos;
+}
+function saveProfile(name, phone, pos) {
+  localStorage.setItem('va_profile', JSON.stringify({ name, phone, pos }));
+}
+
+// ── PROFILE → VOICE ─────────────────────────────────────────
 function goToVoice() {
   const name  = document.getElementById('input-name').value.trim();
   const phone = document.getElementById('input-phone').value.trim();
@@ -971,71 +452,50 @@ function goToVoice() {
   if (!name || !phone || !pos) {
     showToast('⚠️ សូមបំពេញព័ត៌មានទាំងអស់', 'error'); return;
   }
-  saveProfile();
-  // Update voice screen job info
-  document.getElementById('vj-emoji').textContent   = selectedJob.emoji;
-  document.getElementById('vj-title').textContent   = selectedJob.title;
-  document.getElementById('vj-company').textContent = selectedJob.company;
+  saveProfile(name, phone, pos);
+  document.getElementById('vj-emoji').textContent   = selectedJob.emoji || '💼';
+  document.getElementById('vj-title').textContent   = selectedJob.title_km;
+  document.getElementById('vj-company').textContent = selectedJob.company_km;
   showScreen('screen-voice');
 }
 
-// ── RECORDING ───────────────────
+// ── RECORDING ───────────────────────────────────────────────
 async function toggleRecording() {
   if (isRecording) { stopRecording(); return; }
-
-  // Check if we're on a secure context (HTTPS or localhost)
   if (!window.isSecureContext) {
-    showToast('⚠️ ត្រូវការ HTTPS ដើម្បីប្រើមីក្រូហ្វូន', 'error');
-    setTimeout(() => {
-      alert('🎤 មីក្រូហ្វូនមិនអាចប្រើបាននៅ file:// \n\nដំណោះស្រាយ:\n✅ បើក app នៅលើ HTTPS host\n✅ ឬប្រើ localhost server\n\nApp ដំណើរការល្អនៅ Telegram Mini App!');
-    }, 300);
+    showToast('⚠️ ត្រូវការ HTTPS ដើម្បីថត', 'error');
+    setTimeout(() => alert('🎤 ត្រូវការ HTTPS\nសូមប្រើ GitHub Pages URL'), 300);
     return;
   }
-
-  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-    showToast('🎤 Browser មិន Support មីក្រូហ្វូន', 'error');
-    return;
-  }
-
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     startRecording(stream);
   } catch(e) {
     if (e.name === 'NotAllowedError') {
-      showToast('🎤 សូមអនុញ្ញាតការប្រើប្រាស់មីក្រូហ្វូន', 'error');
-      setTimeout(() => alert('សូម Click លើ 🔒 នៅ Address Bar\nហើយ Allow Microphone'), 300);
-    } else if (e.name === 'NotFoundError') {
-      showToast('🎤 រកមិនឃើញមីក្រូហ្វូននៅលើឧបករណ៍', 'error');
+      showToast('🎤 សូម Allow មីក្រូហ្វូន', 'error');
     } else {
-      showToast('🎤 មានបញ្ហា: ' + e.message, 'error');
+      showToast('🎤 មិនអាចប្រើមីក្រូហ្វូន: ' + e.message, 'error');
     }
   }
 }
 
 function startRecording(stream) {
-  audioChunks = [];
-  audioBlob   = null;
-  isRecording = true;
-  secondsLeft = TOTAL_SECS;
-
+  audioChunks = []; audioBlob = null;
+  isRecording = true; secondsLeft = TOTAL_SECS; recordedSecs = 0;
   mediaRecorder = new MediaRecorder(stream);
   mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
   mediaRecorder.onstop = finishRecording;
   mediaRecorder.start(100);
-
-  // UI
   const btn = document.getElementById('record-btn');
-  btn.textContent = '⏹';
-  btn.classList.add('recording');
+  btn.textContent = '⏹'; btn.classList.add('recording');
   document.getElementById('waveform').classList.add('active');
   document.getElementById('record-status').textContent = '● កំពុងថត...';
   document.getElementById('record-status').className = 'record-status recording';
   document.getElementById('playback-section').classList.remove('visible');
   document.getElementById('submit-btn').classList.remove('visible');
-
   updateTimer();
   timerInterval = setInterval(() => {
-    secondsLeft--;
+    secondsLeft--; recordedSecs++;
     updateTimer();
     if (secondsLeft <= 0) stopRecording();
   }, 1000);
@@ -1048,8 +508,7 @@ function stopRecording() {
   mediaRecorder.stop();
   mediaRecorder.stream.getTracks().forEach(t => t.stop());
   const btn = document.getElementById('record-btn');
-  btn.textContent = '🎙';
-  btn.classList.remove('recording');
+  btn.textContent = '🎙'; btn.classList.remove('recording');
   document.getElementById('waveform').classList.remove('active');
 }
 
@@ -1070,8 +529,7 @@ function playRecording() {
 function resetRecording() {
   stopRecording();
   audioBlob = audioURL = audioPlayer = null;
-  audioChunks = [];
-  secondsLeft = TOTAL_SECS;
+  audioChunks = []; secondsLeft = TOTAL_SECS; recordedSecs = 0;
   updateTimer();
   document.getElementById('record-btn').textContent = '🎙';
   document.getElementById('record-status').textContent = 'ចុច 🎙 ដើម្បីចាប់ផ្តើមថត';
@@ -1083,17 +541,18 @@ function resetRecording() {
 
 function updateTimer() {
   document.getElementById('timer-display').textContent = secondsLeft;
-  const pct    = secondsLeft / TOTAL_SECS;
-  const offset = CIRCUMFERENCE * (1 - pct);
-  document.getElementById('timer-circle').style.strokeDashoffset = offset;
+  const offset = CIRCUMFERENCE * (1 - secondsLeft / TOTAL_SECS);
+  const circle = document.getElementById('timer-circle');
+  circle.style.strokeDashoffset = offset;
   const color = secondsLeft > 20 ? 'var(--red)' : secondsLeft > 10 ? 'var(--gold)' : '#ff4444';
-  document.getElementById('timer-circle').style.stroke = color;
+  circle.style.stroke = color;
   document.getElementById('timer-display').style.color = secondsLeft <= 10 ? '#ff4444' : 'var(--text)';
 }
 
-// ── SUBMIT ──────────────────────
+// ── SUBMIT APPLICATION ───────────────────────────────────────
 async function submitApplication() {
   if (!audioBlob) { showToast('⚠️ សូមថតសំឡេងជាមុន', 'error'); return; }
+
   const btn = document.getElementById('submit-btn');
   btn.classList.add('loading');
   btn.textContent = '⏳ កំពុងបញ្ជូន...';
@@ -1103,16 +562,57 @@ async function submitApplication() {
   const pos   = document.getElementById('input-position').value;
 
   try {
-    // 1. Send text message
+    // ── STEP 1: Upload voice to Supabase Storage ──────────
+    const timestamp = Date.now();
+    const filePath  = `voices/${selectedJob.id}/${phone}_${timestamp}.webm`;
+
+    const { data: uploadData, error: uploadError } = await db.storage
+      .from('voices')
+      .upload(filePath, audioBlob, {
+        contentType: 'audio/webm',
+        cacheControl: '3600',
+        upsert: false
+      });
+
+    if (uploadError) throw new Error('Voice upload failed: ' + uploadError.message);
+
+    // ── STEP 2: Get public URL ────────────────────────────
+    const { data: urlData } = db.storage.from('voices').getPublicUrl(filePath);
+    const voiceUrl = urlData.publicUrl;
+
+    // ── STEP 3: Save application to Supabase ──────────────
+    const { data: appData, error: appError } = await db
+      .from('applications')
+      .insert({
+        job_id:             selectedJob.id,
+        applicant_name:     name,
+        applicant_phone:    phone,
+        position_wanted:    pos,
+        voice_url:          voiceUrl,
+        voice_duration:     recordedSecs,
+        status:             'new'
+      })
+      .select()
+      .single();
+
+    if (appError) throw new Error('Save failed: ' + appError.message);
+
+    // ── STEP 4: Save/update worker profile ────────────────
+    await db.from('workers').upsert({
+      name, phone, position_wanted: pos
+    }, { onConflict: 'phone' });
+
+    // ── STEP 5: Notify employer via Telegram ──────────────
     const msg =
       `🆕 ពាក្យសុំការងារថ្មី!\n\n` +
-      `📋 មុខងារ: ${selectedJob.title}\n` +
-      `🏢 ក្រុមហ៊ុន: ${selectedJob.company}\n` +
+      `📋 មុខងារ: ${selectedJob.title_km}\n` +
+      `🏢 ក្រុមហ៊ុន: ${selectedJob.company_km}\n` +
       `👤 ឈ្មោះ: ${name}\n` +
       `📱 ទូរស័ព្ទ: ${phone}\n` +
-      `💼 មុខតំណែងចង់បាន: ${pos}\n` +
-      `📅 ថ្ងៃ: ${new Date().toLocaleString('km-KH')}\n\n` +
-      `🎙 សំឡេងត្រូវបានភ្ជាប់ខាងក្រោម 👇`;
+      `💼 មុខតំណែង: ${pos}\n` +
+      `📅 ថ្ងៃ: ${new Date().toLocaleDateString('km-KH')}\n` +
+      `🔗 ID: ${appData.id.slice(0,8)}\n\n` +
+      `🎙 សំឡេងភ្ជាប់ខាងក្រោម 👇`;
 
     await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
       method: 'POST',
@@ -1120,41 +620,41 @@ async function submitApplication() {
       body: JSON.stringify({ chat_id: CHAT_ID, text: msg })
     });
 
-    // 2. Send voice
+    // ── STEP 6: Send voice to Telegram ────────────────────
     const formData = new FormData();
     formData.append('chat_id', CHAT_ID);
     formData.append('voice', audioBlob, 'voice_pitch.webm');
-    formData.append('caption', `🎙 ${name} · ${pos}`);
-
+    formData.append('caption', `🎙 ${name} · ${pos} · ${selectedJob.title_km}`);
     await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendVoice`, {
-      method: 'POST',
-      body: formData
+      method: 'POST', body: formData
     });
 
-    // Success
-    document.getElementById('success-job').textContent   = selectedJob.title;
+    // ── STEP 7: Show success ──────────────────────────────
+    document.getElementById('success-job').textContent   = selectedJob.title_km;
     document.getElementById('success-name').textContent  = name;
     document.getElementById('success-phone').textContent = phone;
     showScreen('screen-success');
 
-  } catch(e) {
-    showToast('❌ មានបញ្ហា សូមព្យាយាមម្ដងទៀត', 'error');
+  } catch(err) {
+    console.error('Submit error:', err);
+    showToast('❌ ' + (err.message || 'មានបញ្ហា សូមព្យាយាមម្តងទៀត'), 'error');
     btn.classList.remove('loading');
     btn.innerHTML = '📤 បញ្ជូនពាក្យ';
   }
 }
 
-// ── TOAST ────────────────────────
+// ── TOAST ────────────────────────────────────────────────────
 function showToast(msg, type = '') {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.className = `toast ${type} show`;
-  setTimeout(() => t.classList.remove('show'), 3000);
+  setTimeout(() => t.classList.remove('show'), 3500);
 }
 
-// ── INIT ─────────────────────────
+// ── INIT ─────────────────────────────────────────────────────
 loadProfile();
 updateTimer();
+loadJobs(); // Load real jobs from Supabase on start
 </script>
 </body>
 </html>
